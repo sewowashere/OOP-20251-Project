@@ -1,4 +1,6 @@
 package managers;
 
-public class ReservationManager {
+import service.IReservationService;
+
+public class ReservationManager implements IReservationService {
 }

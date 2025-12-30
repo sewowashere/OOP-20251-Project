@@ -38,4 +38,5 @@ public class Route {
     public void setTransferPlace(String transferPlace) {
         this.transferPlace = transferPlace;
     }
+
 }

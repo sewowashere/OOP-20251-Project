@@ -13,7 +13,6 @@ public class Plane {
         this.capacity = row * column;
         this.planeID = planeID;
         this.seatMatrix = new Seat[row][column];
-        super
     }
 
     private int getCapacity() {
@@ -28,11 +27,5 @@ public class Plane {
         return this.seatMatrix;
     }
     // Bunun setterı olmalı mı?
-
-
-    
-
-
-
 
 }

@@ -1,4 +1,6 @@
 package managers;
 
-public class SeatManager {
+import service.ISeatService;
+
+public class SeatManager implements ISeatService {
 }
