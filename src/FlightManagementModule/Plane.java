@@ -4,20 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Plane {
-    private int capacity;
-    private String planeID;
-    // seatMatrix - 2D array or Map
-    // Map seçtiğim için yapısı şu şekilde olacak;
-    // Key = "1A"
-    // Value = {seatNum="1A", Class="BUSINESS", price=500, reserveStatus=false}
-    // put, get, remove
-    Map<String, Seat> seatMatrix;
+    private final int capacity;
+    private final String planeID;
+    private PlaneModel planeModel;
+    private final Seat[][] seatMatrix;
 
-    public Plane (int capacity, String planeID, Map seatMatrix){
-        this.capacity=capacity;
-        this.planeID=planeID;
-        this.seatMatrix = new HashMap<>();
+    public Plane (int capacity, String planeID, String planeModel, Seat[][] seatMatrix, int row, int column){
+        this.capacity = row * column;
+        this.planeID = planeID;
+        this.seatMatrix = new Seat[row][column];
+        super
     }
+
+    private int getCapacity() {
+        return this.capacity;
+    }
+
+    private String getPlaneID() {
+        return this.planeID;
+    }
+
+    private Seat[][] getSeatMatrix() {
+        return this.seatMatrix;
+    }
+    // Bunun setterı olmalı mı?
+
 
     
 

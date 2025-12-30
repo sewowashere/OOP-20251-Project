@@ -1,4 +1,4 @@
-package service;
+package managers;
 
 public class SeatManager {
 }

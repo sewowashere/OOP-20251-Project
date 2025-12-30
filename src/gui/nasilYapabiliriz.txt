@@ -1,0 +1,8 @@
+tuşlara basıldığında o endpointlere gidecek
+(o javafileları çalıştıracak)
+
+main screen
+    |_ login screen tuşu
+        |_ admin staff screen tuşu (eğer adminse)
+        |_ reservation admin screen tuşu
+    |_ flight booking tuşu
