@@ -2,16 +2,15 @@ package FlightManagementModule;
 
 public class Flight {
     private int flightNum;
-    private String departurePlace;
-    private String arrivalPlace;
+    private Route route;
     private String date;
     private String hour;
     private float duration;
 
     public Flight(int flightNum, String departurePlace, String arrivalPlace, String date, String hour, float duration) {
         this.flightNum = flightNum;
-        this.departurePlace = departurePlace;
-        this.arrivalPlace = arrivalPlace;
+        this.route.setArrivalPlace(arrivalPlace);
+        this.route.setDeparturePlace(departurePlace);
         this.date = date;
         this.hour = hour;
         this.duration = duration;
