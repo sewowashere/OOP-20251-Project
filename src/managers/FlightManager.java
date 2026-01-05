@@ -9,12 +9,18 @@ public class FlightManager implements IFlightService {
     private List<Flight> flights = new ArrayList<>();
 
     @Override
-    public void showDestinationCityFlights(String currentCity, String destinationCity) {
-        for(Flight f : flights) {
-            if(f.getArrivalPlace().equalsIgnoreCase(destinationCity) && f.getDeparturePlace().equalsIgnoreCase(currentCity)) {
+    public List<Flight> getDestinationCityFlights(String currentCity, String destinationCity, String date) {
+        List<Flight> foundFlights = new ArrayList<>();
+        for (Flight f : flights) {
+            // Şehirler ve Tarih aynı anda eşleşmeli
+            if (f.getArrivalPlace().equalsIgnoreCase(destinationCity) &&
+                    f.getDeparturePlace().equalsIgnoreCase(currentCity) &&
+                    f.getDate().equals(date)) { // String tarih karşılaştırması
 
+                foundFlights.add(f);
             }
         }
+        return foundFlights;
     }
     @Override
     public void addFlight(Flight flight) {

@@ -7,18 +7,16 @@ public class Route {
     //
     private String departurePlace;
     private String arrivalPlace;
-    private String transferPlace;
+    private String transferPlace = "Direct";    // Varsayılan değer
 
-
-    public Route(String departure, String arrival, String transfer) {
+    public Route(String departure, String arrival) {
         this.departurePlace = departure;
         this.arrivalPlace = arrival;
-        this.transferPlace = transfer;
     }
 
-    //
-    // Getter - Setters
-    //
+    /**
+     * Getter - Setters
+     */
     public String getDeparturePlace(){
         return this.departurePlace;
     }
@@ -38,5 +36,4 @@ public class Route {
     public void setTransferPlace(String transferPlace) {
         this.transferPlace = transferPlace;
     }
-
 }

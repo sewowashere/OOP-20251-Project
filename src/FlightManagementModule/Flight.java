@@ -4,43 +4,84 @@ public class Flight {
     private int flightNum;
     private Route route;
     private String date;
-    private String hour;
+    private float hour;
     private float duration;
+    private Plane plane;
 
-    public Flight(int flightNum, String departurePlace, String arrivalPlace, String date, String hour, float duration) {
+    public Flight(int flightNum, String departurePlace, String arrivalPlace, String date, float hour, float duration, Plane plane, String transfer) {
         this.flightNum = flightNum;
-        this.route.setArrivalPlace(arrivalPlace);
-        this.route.setDeparturePlace(departurePlace);
+
+        // Öncesinde nesneyi oluşturmalıyız:
+        this.route = new Route(departurePlace, arrivalPlace);
+        // Eğer aktarmalı uçuşsa;
+        if (transfer != null && !transfer.isEmpty()){
+            this.route.setTransferPlace(transfer);
+        }
+
         this.date = date;
         this.hour = hour;
         this.duration = duration;
+        this.plane = plane;
     }
 
-    //
-    // Getters
-    //
+    /**
+     * Getters
+     */
     public int getFlightNum() {
         return flightNum;
     }
     public String getDeparturePlace() {
-        return departurePlace;
+        return route.getDeparturePlace();
     }
     public String getArrivalPlace() {
-        return arrivalPlace;
+        return route.getArrivalPlace();
     }
     public String getDate() {
         return date;
     }
-    public String getHour() {
+    public float getHour() {
         return hour;
     }
     public float getDuration() {
         return duration;
     }
-
-    // Verileri dosyaya ayzmayı kolaylaştırmak için CSV formatı
-    public String toFileString() {
-        return flightNum+","+departurePlace+","+arrivalPlace+","+date+","+hour+","+duration;
+    public Plane getPlane(){
+        return plane;
     }
 
+    // Verileri dosyaya ayzmayı kolaylaştırmak için CSV formatı
+    public String toCSV() {
+        return flightNum+","+route.getDeparturePlace()+","+route.getArrivalPlace()+","+date+","+hour+","+duration+","+plane.getPlaneID();
+    }
+
+    // Uçağın iniş yapacağı zamanı hesaplar.
+    public float durationCalculator() {
+        // Saati doğru bir şekilde dakika formatına çevirme (int)
+        int hourToMin = (int)hour*60 + Math.round((hour - (int)hour)*100);
+
+        // Uçuş süresini doğr bir şekilde dakikaya çevirme (int)
+        int durationToMin = (int)duration*60 + Math.round((duration - (int)duration)*100);
+
+        int res = hourToMin + durationToMin;
+        return (float)(res/60) + ((float)(res %60)/100);
+    }
+
+    /**
+     * Boş koltuk sayısını veren yardımcı method.
+     * GUI de işimize yarayabilir.
+     */
+    public int getAvailableSeatsCount() {
+        int count = 0;
+        Seat[][] matrix = plane.getSeatMatrix();
+        for(Seat[] row : matrix){
+            for(Seat seat : row){   //column
+                if(!seat.isReserved()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
 }
+
+

@@ -11,10 +11,9 @@ public class PlaneModel {
         this.column = column;
     }
 
-    public int capacityCalculator() {
-        return row * column;
+    public String getModelName() {
+        return modelName;
     }
-
     public int getRow() {
         return this.row;
     }
