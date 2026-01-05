@@ -1,26 +1,41 @@
 package FlightManagementModule;
+import dao.CSVConvertible;
 
 
-public class Plane {
-    private final int capacity;
-    private final String planeID;
-    private final PlaneModel model;
-    private final Seat[][] seatMatrix;
+public class Plane implements CSVConvertible{
+    private int capacity;
+    private String planeID;
+    private  String model;
+    private  Seat[][] seatMatrix;
 
-    public Plane (PlaneModel model, String planeID, float regularPrice){
+    /*public Plane (PlaneModel model, String planeID, float regularPrice){
         this.model = model;
         this.planeID = planeID;
         this.seatMatrix = new Seat[model.getRow()][model.getColumn()];    // Bunun setterı olmalı mı?
         this.capacity = model.getRow() * model.getColumn();
 
         initializeSeats(regularPrice);
+    }*/
+    
+    public Plane() {
+		this.capacity = 0;
+		this.planeID = "";
+		this.model = null;
+		this.seatMatrix = null;}
+    
+    public Plane(String planeID, String planeModel, int capacity) {
+        this.planeID = planeID;
+ 
+        this.capacity = capacity;
+		this.model = null;
+		this.seatMatrix = null;
     }
 
     /**
      * Uçak koltuklarını businnes ve economy olarak ayırır ve isimlendirir.
      * Dökümanda 1 uçak 30 satır-6 sütun olarak verilmiş.
      */
-    public void  initializeSeats(float regularPrice) {
+   /* public void  initializeSeats(float regularPrice) {
         char letter = 'A';
         for (int i = 0; i < model.getColumn(); i++){
             for (int ii = 0; ii < model.getRow(); ii++) {
@@ -38,7 +53,7 @@ public class Plane {
             }
             letter++;
         }
-    }
+    }*/
 
 
     public String getPlaneID() {
@@ -50,13 +65,24 @@ public class Plane {
     public int getCapacity() {
         return this.capacity;
     }
-    public PlaneModel getModel() {
+    public String getModel() {
         return model;
     }
-
+    @Override
     public String toCSV() {
-        // Not: regularPrice bilgisini Seat nesneleri üzerinden veya
-        // sistem genelinden aldığın için burada temel yapı yeterlidir.
-        return planeID + "," + model.getModelName() + "," + model.getRow() + "," + model.getColumn();
+        return planeID + "," + model + "," + capacity;
     }
+
+    @Override
+    public void fromCSV(String row) {
+        String[] data = row.split(",");
+        this.planeID = data[0];
+        this.model = data[1];
+        this.capacity = Integer.parseInt(data[2]);
+    }
+
+    @Override
+    public String getId() { return planeID; }
+    
 }
+   
