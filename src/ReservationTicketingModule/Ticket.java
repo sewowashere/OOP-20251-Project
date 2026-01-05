@@ -1,26 +1,28 @@
 package ReservationTicketingModule;
 
-public abstract class Ticket {
-    protected final String ticketID;
-    protected Reservation reservationInf;
-    protected float price;
-    protected boolean baggageAllowance;
+public class Ticket {
+    private String ticketID;
+    private double price;
+    private Baggage baggage;
 
-    public Ticket(String ticketID, Reservation reservationInf, float price, boolean baggageAllowance) {
+    public Ticket(String ticketID, double price, Baggage baggage) {
         this.ticketID = ticketID;
-        this.reservationInf = reservationInf;
         this.price = price;
-        this.baggageAllowance = baggageAllowance;
+        this.baggage = baggage;
     }
+    // Getters...
 
-    // Common Getters
-    public float getPrice() {
-        return this.price;
-    }
-    public boolean getBaggageAllowance() {
-        return this.baggageAllowance;
-    }
-    public Reservation getReservationInf() {
-        return reservationInf;
-    }
+	public String getTicketID() {
+		return ticketID;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public Baggage getBaggage() {
+		return baggage;
+	}
+    
+    
 }
