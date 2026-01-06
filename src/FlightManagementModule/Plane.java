@@ -62,7 +62,23 @@ public class Plane implements CSVConvertible{
     public Seat[][] getSeatMatrix() {
         return seatMatrix;
     }
-    public int getCapacity() {
+    public void setCapacity(int capacity) {
+		this.capacity = capacity;
+	}
+
+	public void setPlaneID(String planeID) {
+		this.planeID = planeID;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	public void setSeatMatrix(Seat[][] seatMatrix) {
+		this.seatMatrix = seatMatrix;
+	}
+
+	public int getCapacity() {
         return this.capacity;
     }
     public String getModel() {

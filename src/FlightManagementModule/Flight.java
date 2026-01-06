@@ -46,10 +46,10 @@ public class Flight implements CSVConvertible {
         return flightNum;
     }
     public String getDeparturePlace() {
-        return route.getDeparturePlace();
+        return this.departurePlace;
     }
     public String getArrivalPlace() {
-        return route.getArrivalPlace();
+        return this.arrivalPlace;
     }
     public String getDate() {
         return date;
@@ -68,7 +68,39 @@ public class Flight implements CSVConvertible {
 
 
 
-    /**
+    public void setFlightNum(int flightNum) {
+		this.flightNum = flightNum;
+	}
+
+	public void setRoute(Route route) {
+		this.route = route;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+	public void setHour(float hour) {
+		this.hour = hour;
+	}
+
+	public void setDuration(float duration) {
+		this.duration = duration;
+	}
+
+	public void setPlane(Plane plane) {
+		this.plane = plane;
+	}
+
+	public void setDeparturePlace(String departurePlace) {
+		this.departurePlace = departurePlace;
+	}
+
+	public void setArrivalPlace(String arrivalPlace) {
+		this.arrivalPlace = arrivalPlace;
+	}
+
+	/**
      * Boş koltuk sayısını veren yardımcı method.
      * GUI de işimize yarayabilir.
      */

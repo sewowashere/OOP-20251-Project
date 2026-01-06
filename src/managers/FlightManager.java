@@ -1,39 +1,55 @@
 package managers;
 
-import FlightManagementModule.Flight;
+
 import service.IFlightService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlightManager implements IFlightService {
-    private List<Flight> flights = new ArrayList<>();
+import FlightManagementModule.Flight;
+import dao.FlightDAOImpl; // Senin daha önce oluşturduğun DAO
+import java.util.List;
 
-    @Override
-    public List<Flight> getDestinationCityFlights(String currentCity, String destinationCity, String date) {
-        List<Flight> foundFlights = new ArrayList<>();
-        for (Flight f : flights) {
-            // Şehirler ve Tarih aynı anda eşleşmeli
-            if (f.getArrivalPlace().equalsIgnoreCase(destinationCity) &&
-                    f.getDeparturePlace().equalsIgnoreCase(currentCity) &&
-                    f.getDate().equals(date)) { // String tarih karşılaştırması
+public class FlightManager {
+    private static FlightManager instance;
+    private FlightDAOImpl flightDao;
 
-                foundFlights.add(f);
-            }
+    private FlightManager() {
+        this.flightDao = new FlightDAOImpl();
+    }
+
+    public static FlightManager getInstance() {
+        if (instance == null) {
+            instance = new FlightManager();
         }
-        return foundFlights;
+        return instance;
     }
-    @Override
-    public void addFlight(Flight flight) {
-        flights.add(flight);
-    }
-    @Override
-    public void deleteFlight(int flightNum) {
-        flights.removeIf(f -> f.getFlightNum() == flightNum);
-    }
-    @Override
-    public boolean saveFlightsToFile() {
-        for(Flight f : flights) {
 
+    // Yeni Uçuş Ekleme
+    public void createNewFlight(Flight flight) {
+        if (flightDao.findById(flight.getFlightNum()) == null) {
+            flightDao.save(flight);
+        } else {
+            System.out.println("Hata: Uçuş zaten mevcut: " + flight.getFlightNum());
         }
+    }
+
+    // Uçuş Güncelleme
+    public void updateFlight(Flight flight) {
+        flightDao.update(flight);
+    }
+
+    // Uçuş Silme
+    public void removeFlight(int flightNum) {
+        flightDao.delete(flightNum);
+    }
+
+    // Tüm Uçuşları Listeleme
+    public List<Flight> getAllFlights() {
+        return flightDao.getAll();
+    }
+
+    // Tekil Uçuş Sorgulama
+    public Flight findFlight(int flightNum) {
+        return flightDao.findById(flightNum);
     }
 }
