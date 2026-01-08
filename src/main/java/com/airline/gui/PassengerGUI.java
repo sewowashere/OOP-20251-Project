@@ -273,7 +273,10 @@ public class PassengerGUI extends JFrame {
 
     private void refreshMyReservations(DefaultTableModel model) {
         model.setRowCount(0);
-        String currentUserId = AuthService.getUsername();
+        User current = AuthService.getCurrentUser();
+        if (current == null) return;
+
+        String currentUserId = current.getUsername();
         List<Reservation> myRes = new ReservationDAOImpl().getReservationsByPassenger(currentUserId);
         for (Reservation r : myRes) {
             model.addRow(new Object[]{r.getReservationCode(), r.getFlightNum(), r.getSeatNum(), r.getDateOfReservation()});

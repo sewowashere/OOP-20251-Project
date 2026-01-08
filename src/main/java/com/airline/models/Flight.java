@@ -72,4 +72,8 @@ public class Flight implements CSVConvertible {
     public String toString() {
         return flightNum + "," + getDeparturePlace() + "," + getArrivalPlace() + "," + date + "," + hour + "," + duration + "," + (plane != null ? plane.getPlaneID() : "NULL");
     }
+
+    public Plane getPlane() {
+        return getPlane();
+    }
 }

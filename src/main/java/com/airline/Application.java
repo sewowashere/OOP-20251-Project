@@ -13,7 +13,7 @@ public class Application {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            
+
             // Launch login screen
             new LoginScreen();
         });

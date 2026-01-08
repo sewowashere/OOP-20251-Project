@@ -51,7 +51,7 @@ public class ReservationManager implements IReservationService {
     }
 
 
-     //Ortak Seçim Mantığı: Yolcu rastgele boş bir koltuk bulana kadar dener.
+    //Ortak Seçim Mantığı: Yolcu rastgele boş bir koltuk bulana kadar dener.
     private void performRandomSelection(Seat[][] matrix) {
         boolean seated = false;
         while (!seated) {

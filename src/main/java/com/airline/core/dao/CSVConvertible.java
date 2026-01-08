@@ -10,7 +10,7 @@ public interface CSVConvertible {
      * CSV'den okunan bir satırı nesnenin alanlarına doldurur
      */
     void fromCSV(String row);
-    
+
     /**
      * Nesnenin benzersiz kimliğini (ID) döner (Generic silme/güncelleme için şart)
      */

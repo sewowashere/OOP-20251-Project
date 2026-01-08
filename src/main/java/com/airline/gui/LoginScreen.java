@@ -119,7 +119,8 @@ public class LoginScreen extends JFrame {
             return;
         }
 
-        boolean success = authService.login(username, password);
+        AuthService auth = new AuthService(); // Önce nesneyi oluştur (içindeki userDao başlasın)
+        boolean success = auth.login(username, password);
 
         if (success) {
             User currentUser = AuthService.getCurrentUser();

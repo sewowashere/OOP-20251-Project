@@ -53,7 +53,7 @@ public class Reservation implements CSVConvertible {
     }
 
     @Override public String getId() { return reservationCode; }
-    
+
     // Reservation kurucu metodunda Ticket ve Baggage otomatik oluşturulabilir
 
     public String getReservationCode() {

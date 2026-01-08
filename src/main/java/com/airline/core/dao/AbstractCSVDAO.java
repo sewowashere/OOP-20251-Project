@@ -57,7 +57,7 @@ public abstract class AbstractCSVDAO<T extends CSVConvertible, ID> implements Ge
         List<T> all = getAll();
         // ID'si eşleşmeyenleri filtreleyip dosyayı yeniden yazıyoruz
         boolean removed = all.removeIf(item -> item.getId().equals(id.toString()));
-        
+
         if (removed) {
             rewriteFile(all);
         }

@@ -27,14 +27,14 @@ public class Passenger implements CSVConvertible {
         return passengerID;
     }
     @Override public String getId() { return passengerID; }
-	public String getName() {
-		return name;
-	}
-	public String getSurname() {
-		return surname;
-	}
-	public String getContactInfo() {
-		return contactInfo;
-	}
-    
+    public String getName() {
+        return name;
+    }
+    public String getSurname() {
+        return surname;
+    }
+    public String getContactInfo() {
+        return contactInfo;
+    }
+
 }

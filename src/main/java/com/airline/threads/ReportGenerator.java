@@ -13,14 +13,14 @@ public class ReportGenerator extends Thread {
     public void run() {
         try {
             // Rapor hazırlama simülasyonu (Uzun süren işlem)
-            Thread.sleep(3000); 
-            
+            Thread.sleep(3000);
+
             double occupancyRate = 75.5; // Örnek hesaplama sonucu
             String result = "Rapor Hazır! Doluluk Oranı: %" + occupancyRate;
-            
+
             // Sonucu GUI'ye geri gönder
             onComplete.accept(result);
-            
+
         } catch (InterruptedException e) {
             onComplete.accept("Rapor hatası oluştu!");
         }
