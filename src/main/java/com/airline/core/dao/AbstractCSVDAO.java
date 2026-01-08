@@ -92,4 +92,9 @@ public abstract class AbstractCSVDAO<T extends CSVConvertible, ID> implements Ge
             e.printStackTrace();
         }
     }
+
+    public void saveAll(List<T> entities) {
+        rewriteFile(entities);
+        // Mevcut rewriteFile metodunu kullanarak listeyi dosyaya yazar
+    }
 }

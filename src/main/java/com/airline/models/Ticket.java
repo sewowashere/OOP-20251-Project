@@ -10,19 +10,18 @@ public class Ticket {
         this.price = price;
         this.baggage = baggage;
     }
+
     // Getters...
 
-	public String getTicketID() {
-		return ticketID;
-	}
+    public double getPrice() {
+        return price;
+    }
 
-	public double getPrice() {
-		return price;
-	}
+    public Baggage getBaggage() {
+        return baggage;
+    }
 
-	public Baggage getBaggage() {
-		return baggage;
-	}
-    
-    
+    public String getId() {
+        return ticketID;
+    }
 }

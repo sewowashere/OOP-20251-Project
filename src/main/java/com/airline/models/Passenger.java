@@ -21,11 +21,12 @@ public class Passenger implements CSVConvertible {
         String[] d = row.split(",");
         this.passengerID = d[0]; this.name = d[1]; this.surname = d[2]; this.contactInfo = d[3];
     }
+
+    // Getters
+    public String getPassengerID() {
+        return passengerID;
+    }
     @Override public String getId() { return passengerID; }
-    // Getters...
-	public String getPassengerID() {
-		return passengerID;
-	}
 	public String getName() {
 		return name;
 	}

@@ -1,7 +1,10 @@
 package com.airline.services.implementations;
 
-public interface ISeatService {
-    public int emptySeatsCount();
-    // business - economy şeklinde ayır.
+import com.airline.models.Seat;
 
+public interface ISeatService {
+    public Seat[][] getSeatsForFlight(int flightNum);
+    public void reserveSeat(Seat[][] matrix, String seatNum);
+    public Seat[][] createSeatingArrangement(String planeID, int capacity);
+    public int reservedSeatsCount(Seat[][] matrix);
 }

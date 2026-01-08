@@ -1,14 +1,10 @@
 package com.airline.services.implementations;
 
-import java.util.List;
-
-import com.airline.models.Flight;
-import com.airline.models.Passenger;
 import com.airline.models.Reservation;
+import com.airline.models.Seat;
 
 public interface IReservationService {
-    public Reservation makeReservation(Flight flight, Passenger passenger, String seat);
+    public void reserveRandomSeat(Seat[][] matrix, boolean isSynchronized);
+    public Reservation createReservation(String flightNum, String passengerID, String seatNum, double weight);
     public boolean cancelReservation(String reservationCode);
-    public List<Reservation> getAllReservations();
-    public void saveReservationsToFile();
 }

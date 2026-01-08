@@ -1,22 +1,16 @@
 package com.airline.models;
 
 public class Route {
-    //
-    // Departure - Arrival Information
-    // If plane isn't directly goes to the destination area.
-    //
     private String departurePlace;
     private String arrivalPlace;
-    private String transferPlace = "Direct";    // Varsayılan değer
+    private String transferPlace = "Direct";
 
     public Route(String departure, String arrival) {
         this.departurePlace = departure;
         this.arrivalPlace = arrival;
     }
 
-    /**
-     * Getter - Setters
-     */
+    // Getters - Setters
     public String getDeparturePlace(){
         return this.departurePlace;
     }
