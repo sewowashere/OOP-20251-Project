@@ -132,6 +132,8 @@ public class LoginScreen extends JFrame {
                 new AdminGUI();
             } else if (currentUser.getRole().equalsIgnoreCase("PASSENGER")) {
                 new PassengerGUI();
+            } else if (currentUser.getRole().equalsIgnoreCase("STAFF")) {
+                new StaffGUI(); // Artık kendi özel class'ını açıyor!
             }
 
             // Login ekranını kapat
