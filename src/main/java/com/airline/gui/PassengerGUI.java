@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
 import com.airline.models.*;
 import com.airline.services.*;
 import com.airline.services.pricing.CalculatePrice;
@@ -70,9 +71,27 @@ public class PassengerGUI extends JFrame {
         JPanel searchBox = new JPanel(new GridLayout(2, 2, 5, 5));
         searchBox.setOpaque(false);
 
-        String[] cities = flightManager.getUniqueCities();
-        JComboBox<String> comboFrom = new JComboBox<>(cities.length > 0 ? cities : new String[]{"No Cities"});
-        JComboBox<String> comboTo = new JComboBox<>(cities.length > 0 ? cities : new String[]{"No Cities"});
+        String[] allDepartureCities = flightManager.getUniqueCities();
+        JComboBox<String> comboFrom = new JComboBox<>(allDepartureCities.length > 0 ? allDepartureCities : new String[]{"No Cities"});
+        JComboBox<String> comboTo = new JComboBox<>();
+
+        comboFrom.addActionListener(e -> {
+            String selectedFrom = (String) comboFrom.getSelectedItem();
+            comboTo.removeAllItems();
+            if (selectedFrom != null) {
+                List<String> validDestinations = flightManager.getAllFlights().stream()
+                        .filter(f -> f.getDeparturePlace().equalsIgnoreCase(selectedFrom))
+                        .map(Flight::getArrivalPlace)
+                        .distinct()
+                        .collect(Collectors.toList());
+
+                for (String city : validDestinations) {
+                    comboTo.addItem(city);
+                }
+            }
+        });
+
+        if (comboFrom.getItemCount() > 0) comboFrom.setSelectedIndex(0);
 
         searchBox.add(new JLabel("Departure City:")); searchBox.add(comboFrom);
         searchBox.add(new JLabel("Arrival City:"));   searchBox.add(comboTo);
@@ -98,7 +117,6 @@ public class PassengerGUI extends JFrame {
         btnConfirm.setEnabled(false);
 
         // --- LISTENERS ---
-
         btnSearch.addActionListener(e -> {
             List<Flight> results = flightManager.getAvailableFlights(
                     (String)comboFrom.getSelectedItem(),
@@ -132,7 +150,6 @@ public class PassengerGUI extends JFrame {
             }
         });
 
-        // --- HAVALI ONAY VE BAGAJ EKRANI ---
         btnConfirm.addActionListener(e -> {
             Seat selected = seatMapPanel.getSelectedSeat();
             if (selected == null) return;
@@ -141,7 +158,6 @@ public class PassengerGUI extends JFrame {
             double ticketPrice = cp.getFinalPrice(selected.getPrice(), selected.getSeatClass());
             double allowance = cp.getAllowance(selected.getSeatClass());
 
-            // 1. Bagaj Girişi
             String weightStr = JOptionPane.showInputDialog(this,
                     "Baggage Allowance for " + selected.getSeatClass() + " is " + allowance + "kg.\n" +
                             "Enter your baggage weight (kg):", "15");
@@ -149,17 +165,11 @@ public class PassengerGUI extends JFrame {
             if (weightStr == null) return;
 
             double weight;
-            try {
-                weight = Double.parseDouble(weightStr);
-            } catch (NumberFormatException ex) {
-                weight = 15.0;
-            }
+            try { weight = Double.parseDouble(weightStr); } catch (NumberFormatException ex) { weight = 15.0; }
 
-            // 2. Ekstra Ücret Hesaplama
             double baggageFee = cp.calculateBaggageSurcharge(weight, selected.getSeatClass());
             double total = ticketPrice + baggageFee;
 
-            // 3. Özet Onay Ekranı
             String summary = String.format(
                     "--- BOOKING SUMMARY ---\n" +
                             "Flight: %d (%s -> %s)\n" +
@@ -168,8 +178,7 @@ public class PassengerGUI extends JFrame {
                             "Baggage: %.1f kg (Limit: %.1f kg)\n" +
                             "Baggage Fee: %.2f TL\n" +
                             "---------------------------\n" +
-                            "TOTAL: %.2f TL\n\n" +
-                            "Confirm this reservation?",
+                            "TOTAL: %.2f TL\n\nConfirm this reservation?",
                     selectedFlight.getFlightNum(), selectedFlight.getDeparturePlace(), selectedFlight.getArrivalPlace(),
                     selected.getSeatNum(), selected.getSeatClass(), ticketPrice,
                     weight, allowance, baggageFee, total
@@ -185,7 +194,6 @@ public class PassengerGUI extends JFrame {
                         selected.getSeatNum(),
                         weight
                 );
-
                 JOptionPane.showMessageDialog(this, "Booking Successful!");
                 seatMapPanel.repaint();
                 btnConfirm.setEnabled(false);
@@ -208,44 +216,27 @@ public class PassengerGUI extends JFrame {
         };
         JTable table = new JTable(model);
         table.setRowHeight(25);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // --- BUTONLAR PANELİ ---
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         buttonPanel.setOpaque(false);
 
-        // 1. DETAY GÖRÜNTÜLEME BUTONU (YENİ)
         JButton btnView = new JButton("View Ticket Details");
         btnView.setBackground(new Color(0, 112, 192));
         btnView.setForeground(Color.WHITE);
-        btnView.setFont(new Font("Arial", Font.BOLD, 14));
 
-        // 2. İPTAL ETME BUTONU
         JButton btnCancel = new JButton("Cancel Selected Reservation");
         btnCancel.setBackground(new Color(220, 20, 60));
         btnCancel.setForeground(Color.WHITE);
-        btnCancel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        // --- BUTON AKSİYONLARI ---
-
-        // View Ticket Aksiyonu
         btnView.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row != -1) {
                 String pnrCode = (String) model.getValueAt(row, 0);
-                // DAO üzerinden rezervasyonu buluyoruz
                 Reservation res = new ReservationDAOImpl().findById(pnrCode);
-                if (res != null) {
-                    showReservationDetails(res);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Could not load ticket details.");
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select a reservation from the table first!");
+                if (res != null) showReservationDetails(res);
             }
         });
 
-        // Cancel Aksiyonu
         btnCancel.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row != -1) {
@@ -263,25 +254,18 @@ public class PassengerGUI extends JFrame {
 
         buttonPanel.add(btnView);
         buttonPanel.add(btnCancel);
-
         mainPanel.add(new JScrollPane(table), BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        refreshMyReservations(model);
         return mainPanel;
     }
 
-    // PassengerGUI.java içindeki metot
     private void refreshMyReservations(DefaultTableModel model) {
         model.setRowCount(0);
         User current = AuthService.getCurrentUser();
         if (current == null) return;
-
-        String currentUserId = current.getUsername();
-        List<Reservation> myRes = new ReservationDAOImpl().getReservationsByPassenger(currentUserId);
-
+        List<Reservation> myRes = new ReservationDAOImpl().getReservationsByPassenger(current.getUsername());
         for (Reservation r : myRes) {
-            // KRİTİK KONTROL: Eğer uçuş Manager'da yoksa (silindiyse) tabloya ekleme
             if (flightManager.findFlight(Integer.parseInt(r.getFlightNum())) != null) {
                 model.addRow(new Object[]{r.getReservationCode(), r.getFlightNum(), r.getSeatNum(), r.getDateOfReservation()});
             }
@@ -289,42 +273,20 @@ public class PassengerGUI extends JFrame {
     }
 
     private void showReservationDetails(Reservation res) {
-        // Uçuş bilgilerini Route nesnesi üzerinden çekiyoruz
         Flight f = flightManager.findFlight(Integer.parseInt(res.getFlightNum()));
-
-        // Reservation içindeki tüm verileri topluyoruz
-        String pnr = res.getReservationCode();
-        String passenger = res.getPassengerID();
-        String seat = res.getSeatNum();
-        String flightInfo = f.getDeparturePlace() + " to " + f.getArrivalPlace();
-        String dateInfo = f.getDate() + " at " + f.getHour();
-
-        // Ticket ve Baggage bilgilerini güvenli çekiyoruz
         double price = (res.getTicket() != null) ? res.getTicket().getPrice() : 0.0;
-        double weight = (res.getTicket() != null && res.getTicket().getBaggage() != null)
-                ? res.getTicket().getBaggage().getWeight() : 0.0;
+        double weight = (res.getTicket() != null && res.getTicket().getBaggage() != null) ? res.getTicket().getBaggage().getWeight() : 0.0;
 
-        // Pencere içeriği (HTML kullanarak daha şık yapalım)
-        String htmlContent = "<html><body style='width: 300px; padding: 10px; font-family: Arial;'>" +
-                "<h2 style='color: #0070C0; text-align: center;'>E-TICKET DETAILS</h2>" +
-                "<hr>" +
-                "<p><b>PNR Code:</b> " + pnr + "</p>" +
-                "<p><b>Passenger:</b> " + passenger + "</p>" +
-                "<p><b>Flight:</b> " + flightInfo + "</p>" +
-                "<p><b>Date/Time:</b> " + dateInfo + "</p>" +
-                "<p><b>Seat:</b> <span style='color: red;'>" + seat + "</span></p>" +
-                "<hr>" +
-                "<p><b>Baggage:</b> " + weight + " kg</p>" +
-                "<p><b>Total Price:</b> <b style='font-size: 14px;'>" + price + " TL</b></p>" +
-                "<hr>" +
-                "<p style='font-size: 10px; color: gray; text-align: center;'>Status: CONFIRMED</p>" +
-                "</body></html>";
-
-        // İşte beklediğin o PENCERE (Dialog)
-        JOptionPane.showMessageDialog(this,
-                new JLabel(htmlContent),
-                "Official Ticket: " + pnr,
-                JOptionPane.PLAIN_MESSAGE);
+        String htmlContent = String.format(
+                "<html><body style='width: 250px; font-family: Arial;'>" +
+                        "<h2 style='color: #0070C0;'>TICKET</h2><hr>" +
+                        "<b>PNR:</b> %s<br><b>Passenger:</b> %s<br><b>Flight:</b> %s -> %s<br>" +
+                        "<b>Date:</b> %s %s<br><b>Seat:</b> %s<hr>" +
+                        "<b>Baggage:</b> %.1f kg<br><b>Total:</b> %.2f TL" +
+                        "</body></html>",
+                res.getReservationCode(), res.getPassengerID(), f.getDeparturePlace(), f.getArrivalPlace(),
+                f.getDate(), f.getHour(), res.getSeatNum(), weight, price
+        );
+        JOptionPane.showMessageDialog(this, new JLabel(htmlContent), "Ticket Info", JOptionPane.PLAIN_MESSAGE);
     }
-
 }
