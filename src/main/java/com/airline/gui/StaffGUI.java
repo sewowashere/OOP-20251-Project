@@ -121,14 +121,12 @@ public class StaffGUI extends JFrame {
 
         btnAdd.addActionListener(e -> {
             try {
-                flightManager.createAndSaveFlight(
-                        Integer.parseInt(txtNum.getText()), txtDep.getText(),
-                        txtArr.getText(), txtDate.getText(),
-                        Float.parseFloat(txtHour.getText()), Float.parseFloat(txtDur.getText())
-                );
+                validateAndSave(txtNum, txtDep, txtArr, txtDate, txtHour, txtDur, false);
                 refreshFlightData(model);
-                JOptionPane.showMessageDialog(this, "Flight added!");
-            } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage()); }
+                JOptionPane.showMessageDialog(this, "Flight added successfully!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
         });
 
         btnDel.addActionListener(e -> {
@@ -195,5 +193,44 @@ public class StaffGUI extends JFrame {
                 f.getFlightNum(), f.getDeparturePlace(), f.getArrivalPlace(),
                 f.getDate(), f.getHour(), f.getDuration()
         }));
+    }
+
+    // --- ÖNEMLİ: VALIDATION VE SÜRE NORMALİZASYONU ---
+// StaffGUI.java içindeki metodun güncel hali
+    private void validateAndSave(JTextField fNo, JTextField dep, JTextField arr, JTextField dt, JTextField hr, JTextField dur, boolean isEdit) throws Exception {
+        if (fNo.getText().isEmpty() || dt.getText().isEmpty()) throw new Exception("Fill all fields!");
+
+        String inputDate = dt.getText();
+        if (!inputDate.matches("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")) {
+            throw new Exception("Invalid Date Format (Use YYYY-MM-DD)!");
+        }
+
+        // GEÇMİŞ TARİH KONTROLÜ
+        java.time.LocalDate flightDate = java.time.LocalDate.parse(inputDate);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (flightDate.isBefore(today)) {
+            throw new Exception("Bro, date cannot be in the past!");
+        }
+
+        float h = Float.parseFloat(hr.getText());
+        if (h < 0 || h >= 24 || (h % 1) > 0.59) throw new Exception("Invalid Hour!");
+
+        float rawDur = Float.parseFloat(dur.getText());
+        int hPart = (int) rawDur;
+        int mPart = Math.round((rawDur - hPart) * 100);
+        if (mPart >= 60) {
+            hPart += mPart / 60;
+            mPart = mPart % 60;
+        }
+        float normalizedDur = hPart + (mPart / 100.0f);
+
+        if (isEdit) {
+            flightManager.deleteFlightWithIntegrity(Integer.parseInt(fNo.getText()));
+        }
+
+        flightManager.createAndSaveFlight(
+                Integer.parseInt(fNo.getText()), dep.getText(), arr.getText(),
+                inputDate, h, normalizedDur
+        );
     }
 }

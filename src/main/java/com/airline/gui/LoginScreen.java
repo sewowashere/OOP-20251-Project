@@ -29,11 +29,11 @@ public class LoginScreen extends JFrame {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(60, 120, 60, 120));
         mainPanel.setBackground(new Color(240, 248, 255));
 
-        // Başlık
-        JLabel titleLabel = new JLabel("Airline Reservation System", SwingConstants.CENTER);
+        // Başlık (mag gizli/buz mavisi, Airline Reservation System görünür)
+        JLabel titleLabel = new JLabel("<html><span style='color: #e3e1ed; font-size: 14px;'>mag</span>Airlines Reservation System</html>", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
-        titleLabel.setForeground(new Color(25, 25, 112));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 40, 0));
+        titleLabel.setForeground(new Color(25, 25, 112)); // Ana başlık rengi: Midnight Blue
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Form paneli
@@ -90,16 +90,6 @@ public class LoginScreen extends JFrame {
         formPanel.add(loginButton, gbc);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
-
-        // Info paneli
-        JPanel infoPanel = new JPanel();
-        infoPanel.setBackground(new Color(240, 248, 255));
-        infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        JLabel infoLabel = new JLabel("<html><center>Made by Group 19<br><br>K. B. ARI <br><br>S. CABUK</center></html>");
-        infoLabel.setFont(new Font("Arial", Font.ITALIC, 24));
-        infoLabel.setForeground(Color.GRAY);
-        infoPanel.add(infoLabel);
-        mainPanel.add(infoPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
 

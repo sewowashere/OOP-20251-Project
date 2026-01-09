@@ -160,40 +160,47 @@ public class AdminGUI extends JFrame {
     }
 
     // --- ÖNEMLİ: VALIDATION VE SÜRE NORMALİZASYONU ---
+// AdminGUI.java içindeki metodun güncel hali
     private void validateAndSave(JTextField fNo, JTextField dep, JTextField arr, JTextField dt, JTextField hr, JTextField dur, boolean isEdit) throws Exception {
         if (fNo.getText().isEmpty() || dt.getText().isEmpty()) throw new Exception("Fill all fields!");
 
-        // Tarih Kontrolü
-        if (!dt.getText().matches("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")) {
-            throw new Exception("Invalid Date (YYYY-MM-DD)!");
+        // 1. Tarih Formatı Kontrolü (YYYY-MM-DD)
+        String inputDate = dt.getText();
+        if (!inputDate.matches("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")) {
+            throw new Exception("Invalid Date Format (Use YYYY-MM-DD)!");
         }
 
-        // Saat Kontrolü
+        // 2. GEÇMİŞ TARİH KONTROLÜ (YENİ)
+        java.time.LocalDate flightDate = java.time.LocalDate.parse(inputDate);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (flightDate.isBefore(today)) {
+            throw new Exception("Bruh! You cannot add a flight to the past (Before " + today + ")!");
+        }
+
+        // 3. Saat Kontrolü (0.00-23.59)
         float h = Float.parseFloat(hr.getText());
         if (h < 0 || h >= 24 || (h % 1) > 0.59) throw new Exception("Invalid Hour (0.00-23.59)!");
 
-        // Süre Normalizasyonu (1.99 -> 2.39 Çözümü)
+        // 4. Süre Normalizasyonu (1.99 -> 2.39 Çözümü)
         float rawDur = Float.parseFloat(dur.getText());
         int hPart = (int) rawDur;
         int mPart = Math.round((rawDur - hPart) * 100);
         if (mPart >= 60) {
-            hPart += mPart / 60;
+            hPart += mPart / 60; // Not: Buradaki değişken adı hPart olmalı, yukarıdakine uyumlu
             mPart = mPart % 60;
         }
         float normalizedDur = hPart + (mPart / 100.0f);
 
         if (isEdit) {
-            // Eğer edit modundaysak önce eskiyi silip yeniyi ekliyoruz (Manager yapısına uygun)
             flightManager.deleteFlightWithIntegrity(Integer.parseInt(fNo.getText()));
         }
 
         flightManager.createAndSaveFlight(
                 Integer.parseInt(fNo.getText()), dep.getText(), arr.getText(),
-                dt.getText(), h, normalizedDur
+                inputDate, h, normalizedDur
         );
     }
 
-    // --- DİĞER PANELLER (Concurrency, Report, Staff) AYNI KALIYOR ---
     private JPanel createSimulationPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         JPanel topControls = new JPanel();

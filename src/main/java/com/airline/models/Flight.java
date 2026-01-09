@@ -73,6 +73,13 @@ public class Flight implements CSVConvertible {
         return flightNum + "," + getDeparturePlace() + "," + getArrivalPlace() + "," + date + "," + hour + "," + duration + "," + (plane != null ? plane.getPlaneID() : "NULL");
     }
 
+    // Flight.java içine bu metodun olduğundan emin ol
+    public String getFormattedHour() {
+        int hours = (int) hour;
+        int minutes = Math.round((hour - hours) * 100);
+        return String.format("%02d:%02d", hours, minutes);
+    }
+
     public Plane getPlane() {
         return getPlane();
     }
