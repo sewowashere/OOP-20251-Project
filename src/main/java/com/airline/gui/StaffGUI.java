@@ -189,10 +189,16 @@ public class StaffGUI extends JFrame {
 
     private void refreshFlightData(DefaultTableModel m) {
         m.setRowCount(0);
-        flightManager.getAllFlights().forEach(f -> m.addRow(new Object[]{
-                f.getFlightNum(), f.getDeparturePlace(), f.getArrivalPlace(),
-                f.getDate(), f.getHour(), f.getDuration()
-        }));
+        flightManager.getAllFlights().forEach(f -> {
+            m.addRow(new Object[]{
+                    f.getFlightNum(),
+                    f.getDeparturePlace(),
+                    f.getArrivalPlace(),
+                    f.getDate(),
+                    f.getFormattedHour(), // float değil, saat formatlı String gidiyor
+                    f.getDuration()
+            });
+        });
     }
 
     // --- ÖNEMLİ: VALIDATION VE SÜRE NORMALİZASYONU ---
@@ -205,16 +211,26 @@ public class StaffGUI extends JFrame {
             throw new Exception("Invalid Date Format (Use YYYY-MM-DD)!");
         }
 
-        // GEÇMİŞ TARİH KONTROLÜ
+        // Geçmiş Tarih Kontrolü
         java.time.LocalDate flightDate = java.time.LocalDate.parse(inputDate);
         java.time.LocalDate today = java.time.LocalDate.now();
         if (flightDate.isBefore(today)) {
             throw new Exception("Bro, date cannot be in the past!");
         }
 
-        float h = Float.parseFloat(hr.getText());
-        if (h < 0 || h >= 24 || (h % 1) > 0.59) throw new Exception("Invalid Hour!");
+        // Kalkış Saati Kontrolü ve Normalizasyonu
+        float rawHour = Float.parseFloat(hr.getText());
+        int hourPartH = (int) rawHour;
+        int minPartH = Math.round((rawHour - hourPartH) * 100);
+        if (minPartH >= 60) {
+            hourPartH += minPartH / 60;
+            minPartH = minPartH % 60;
+        }
+        float finalHour = hourPartH + (minPartH / 100.0f);
 
+        if (finalHour < 0 || finalHour >= 24) throw new Exception("Invalid Hour!");
+
+        // Süre Normalizasyonu
         float rawDur = Float.parseFloat(dur.getText());
         int hPart = (int) rawDur;
         int mPart = Math.round((rawDur - hPart) * 100);
@@ -230,7 +246,7 @@ public class StaffGUI extends JFrame {
 
         flightManager.createAndSaveFlight(
                 Integer.parseInt(fNo.getText()), dep.getText(), arr.getText(),
-                inputDate, h, normalizedDur
+                inputDate, finalHour, normalizedDur
         );
     }
 }

@@ -170,23 +170,33 @@ public class AdminGUI extends JFrame {
             throw new Exception("Invalid Date Format (Use YYYY-MM-DD)!");
         }
 
-        // 2. GEÇMİŞ TARİH KONTROLÜ (YENİ)
+        // 2. Geçmiş Tarih Kontrolü
         java.time.LocalDate flightDate = java.time.LocalDate.parse(inputDate);
         java.time.LocalDate today = java.time.LocalDate.now();
         if (flightDate.isBefore(today)) {
             throw new Exception("Bruh! You cannot add a flight to the past (Before " + today + ")!");
         }
 
-        // 3. Saat Kontrolü (0.00-23.59)
-        float h = Float.parseFloat(hr.getText());
-        if (h < 0 || h >= 24 || (h % 1) > 0.59) throw new Exception("Invalid Hour (0.00-23.59)!");
+        // 3. Saat Kontrolü ve Normalizasyonu (13.70 -> 14.10)
+        float rawHour = Float.parseFloat(hr.getText());
+        int hourPartH = (int) rawHour;
+        int minPartH = Math.round((rawHour - hourPartH) * 100);
+        if (minPartH >= 60) {
+            hourPartH += minPartH / 60;
+            minPartH = minPartH % 60;
+        }
+        float finalHour = hourPartH + (minPartH / 100.0f);
 
-        // 4. Süre Normalizasyonu (1.99 -> 2.39 Çözümü)
+        if (finalHour < 0 || finalHour >= 24) {
+            throw new Exception("Invalid Hour! Final time must be between 00:00 and 23:59.");
+        }
+
+        // 4. Süre Normalizasyonu (1.99 -> 2.39)
         float rawDur = Float.parseFloat(dur.getText());
         int hPart = (int) rawDur;
         int mPart = Math.round((rawDur - hPart) * 100);
         if (mPart >= 60) {
-            hPart += mPart / 60; // Not: Buradaki değişken adı hPart olmalı, yukarıdakine uyumlu
+            hPart += mPart / 60; // Hata buradaydı, hPart olarak düzelttim
             mPart = mPart % 60;
         }
         float normalizedDur = hPart + (mPart / 100.0f);
@@ -197,7 +207,7 @@ public class AdminGUI extends JFrame {
 
         flightManager.createAndSaveFlight(
                 Integer.parseInt(fNo.getText()), dep.getText(), arr.getText(),
-                inputDate, h, normalizedDur
+                inputDate, finalHour, normalizedDur
         );
     }
 
@@ -271,7 +281,16 @@ public class AdminGUI extends JFrame {
 
     private void refreshFlightData(DefaultTableModel m) {
         m.setRowCount(0);
-        flightManager.getAllFlights().forEach(f -> m.addRow(new Object[]{f.getFlightNum(), f.getDeparturePlace(), f.getArrivalPlace(), f.getDate(), f.getHour(), f.getDuration()}));
+        flightManager.getAllFlights().forEach(f -> {
+            m.addRow(new Object[]{
+                    f.getFlightNum(),
+                    f.getDeparturePlace(),
+                    f.getArrivalPlace(),
+                    f.getDate(),
+                    f.getFormattedHour(), // float değil, saat formatlı String gidiyor
+                    f.getDuration()
+            });
+        });
     }
 
     private void refreshStaffTable(DefaultTableModel m) {
