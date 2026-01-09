@@ -134,6 +134,12 @@ public class SeatMapPanel extends JPanel {
         g2d.setColor(Color.BLACK);
         g2d.drawRect(MARGIN + 210, legendY, 12, 12);
         g2d.drawString("Selected", MARGIN + 226, legendY + 10);
+        
+        g2d.setColor(new Color(145, 30, 180));
+        g2d.fillRect(MARGIN + 310, legendY, 12, 12);
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(MARGIN + 310, legendY, 12, 12);
+        g2d.drawString("Business", MARGIN + 326, legendY + 10);
     }
 
     private void drawSeat(Graphics2D g2d, int x, int y, Seat seat) {
@@ -141,27 +147,28 @@ public class SeatMapPanel extends JPanel {
         String label = "";
 
         if (seat == null) {
-            seatColor = new Color(200, 200, 200); // Grey - No seat
+            seatColor = new Color(200, 200, 200); // Gri - Koltuk yok
         } else {
-            // Determine color based on seat status
             if (selectedSeat != null && selectedSeat.equals(seat)) {
                 seatColor = new Color(0, 200, 255); // Açık Mavi - Seçili
             } else if (seat.isReserved()) {
                 seatColor = new Color(255, 165, 0); // Turuncu - Dolu
+            } else if (seat.getSeatClass() == Seat.SeatClass.BUSINESS) {
+                seatColor = new Color(145, 30, 180); // MOR - Business Class
             } else {
-                seatColor = new Color(0, 112, 192); // Koyu Mavi - Boş/Alınabilir
+                seatColor = new Color(0, 112, 192); // Koyu Mavi - Economy (Boş)
             }
             label = seat.getSeatNum();
         }
 
-        // Draw seat
+        // Koltuğu çiz
         g2d.setColor(seatColor);
         g2d.fillRect(x, y, SEAT_WIDTH, SEAT_HEIGHT);
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(1.5f));
         g2d.drawRect(x, y, SEAT_WIDTH, SEAT_HEIGHT);
 
-        // Draw seat label (row + column letter)
+        // Etiketi çiz
         if (!label.isEmpty()) {
             g2d.setFont(new Font("Arial", Font.BOLD, 12));
             g2d.setColor(Color.WHITE);

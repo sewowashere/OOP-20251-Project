@@ -86,13 +86,13 @@ public class AdminGUI extends JFrame {
 
         // --- BUTTONS ---
         JButton btnAdd = new JButton("Add Flight");
-        btnAdd.setBackground(new Color(0, 128, 0)); btnAdd.setForeground(Color.WHITE);
+        btnAdd.setBackground(Color.WHITE); btnAdd.setForeground(new Color(0, 128, 0));
 
         JButton btnEdit = new JButton("Update Selected");
-        btnEdit.setBackground(new Color(0, 112, 192)); btnEdit.setForeground(Color.WHITE);
+        btnEdit.setBackground(Color.WHITE); btnEdit.setForeground(new Color(0, 112, 192));
 
         JButton btnDel = new JButton("Delete Selected");
-        btnDel.setBackground(new Color(220, 20, 60)); btnDel.setForeground(Color.WHITE);
+        btnDel.setBackground(Color.WHITE); btnDel.setForeground(new Color(220, 20, 60));
 
         // --- ADD ACTION ---
         btnAdd.addActionListener(e -> {
@@ -174,7 +174,7 @@ public class AdminGUI extends JFrame {
         java.time.LocalDate flightDate = java.time.LocalDate.parse(inputDate);
         java.time.LocalDate today = java.time.LocalDate.now();
         if (flightDate.isBefore(today)) {
-            throw new Exception("Bruh! You cannot add a flight to the past (Before " + today + ")!");
+            throw new Exception("! You cannot add a flight to the past (Before " + today + ")!");
         }
 
         // 3. Saat Kontrolü ve Normalizasyonu (13.70 -> 14.10)

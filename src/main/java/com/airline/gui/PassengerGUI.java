@@ -221,12 +221,12 @@ public class PassengerGUI extends JFrame {
         buttonPanel.setOpaque(false);
 
         JButton btnView = new JButton("View Ticket Details");
-        btnView.setBackground(new Color(0, 112, 192));
-        btnView.setForeground(Color.WHITE);
+        btnView.setBackground(Color.WHITE);
+        btnView.setForeground(new Color(0, 112, 192));
 
         JButton btnCancel = new JButton("Cancel Selected Reservation");
-        btnCancel.setBackground(new Color(220, 20, 60));
-        btnCancel.setForeground(Color.WHITE);
+        btnCancel.setBackground(Color.WHITE);
+        btnCancel.setForeground(new Color(220, 20, 60));
 
         btnView.addActionListener(e -> {
             int row = table.getSelectedRow();

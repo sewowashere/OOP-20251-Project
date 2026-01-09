@@ -73,8 +73,8 @@ public class LoginScreen extends JFrame {
         loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.BOLD, 36));
         loginButton.setPreferredSize(new Dimension(300, 70));
-        loginButton.setBackground(Color.BLACK);
-        loginButton.setForeground(Color.WHITE);
+        loginButton.setBackground(Color.WHITE);
+        loginButton.setForeground(Color.BLACK);
         loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         formPanel.add(loginButton, gbc);
 

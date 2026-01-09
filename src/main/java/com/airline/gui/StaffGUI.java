@@ -112,12 +112,12 @@ public class StaffGUI extends JFrame {
         formPanel.add(new JLabel("Duration:")); formPanel.add(txtDur);
 
         JButton btnAdd = new JButton("Add Flight");
-        btnAdd.setBackground(new Color(0, 128, 0));
-        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setBackground(Color.WHITE);
+        btnAdd.setForeground(new Color(0, 128, 0));
 
         JButton btnDel = new JButton("Delete Selected Flight");
-        btnDel.setBackground(new Color(220, 20, 60));
-        btnDel.setForeground(Color.WHITE);
+        btnDel.setBackground(Color.WHITE);
+        btnDel.setForeground(Color.RED);
 
         btnAdd.addActionListener(e -> {
             try {
