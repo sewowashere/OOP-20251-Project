@@ -1,0 +1,12 @@
+# Eclipse iç ayarları ve logları (Sıkıntı çıkaran yer burası)
+.metadata/
+.settings/
+.recommenders/
+
+# Derlenmiş dosyalar (Bunlar kod değil, bilgisayarın ürettiği çıktılar)
+bin/
+*.class
+
+# Proje dosyaları (Genelde her bilgisayarda farklı olur)
+.project
+.classpath
