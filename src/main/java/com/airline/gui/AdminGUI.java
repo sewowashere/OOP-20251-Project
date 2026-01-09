@@ -68,7 +68,7 @@ public class AdminGUI extends JFrame {
         refreshFlightData(model);
 
         JPanel formPanel = new JPanel(new GridLayout(3, 4, 10, 10));
-        formPanel.setBorder(BorderFactory.createTitledBorder("Add New Flight Details"));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Flight Details (Add/Edit)"));
 
         JTextField txtNum = new JTextField();
         JTextField txtDep = new JTextField();
@@ -82,49 +82,76 @@ public class AdminGUI extends JFrame {
         formPanel.add(new JLabel("Arr:")); formPanel.add(txtArr);
         formPanel.add(new JLabel("Date (YYYY-MM-DD):")); formPanel.add(txtDate);
         formPanel.add(new JLabel("Hour (0.0-23.59):")); formPanel.add(txtHour);
-        formPanel.add(new JLabel("Duration:")); formPanel.add(txtDur);
+        formPanel.add(new JLabel("Duration (HH.MM):")); formPanel.add(txtDur);
 
+        // --- BUTTONS ---
         JButton btnAdd = new JButton("Add Flight");
         btnAdd.setBackground(new Color(0, 128, 0)); btnAdd.setForeground(Color.WHITE);
 
+        JButton btnEdit = new JButton("Update Selected");
+        btnEdit.setBackground(new Color(0, 112, 192)); btnEdit.setForeground(Color.WHITE);
+
+        JButton btnDel = new JButton("Delete Selected");
+        btnDel.setBackground(new Color(220, 20, 60)); btnDel.setForeground(Color.WHITE);
+
+        // --- ADD ACTION ---
         btnAdd.addActionListener(e -> {
             try {
-                // VALIDATION: Boşluk, Tarih Formatı ve Saat Limitleri
-                if (txtNum.getText().isEmpty() || txtDate.getText().isEmpty()) throw new Exception("Fill all fields!");
-
-                String date = txtDate.getText();
-                if (!date.matches("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")) {
-                    throw new Exception("Invalid Date Format (Use YYYY-MM-DD)!");
-                }
-
-                float hour = Float.parseFloat(txtHour.getText());
-                if (hour < 0 || hour >= 24 || (hour % 1) > 0.59) {
-                    throw new Exception("Invalid Hour (0.00 - 23.59)!");
-                }
-
-                flightManager.createAndSaveFlight(
-                        Integer.parseInt(txtNum.getText()), txtDep.getText(), txtArr.getText(),
-                        date, hour, Float.parseFloat(txtDur.getText())
-                );
-
+                validateAndSave(txtNum, txtDep, txtArr, txtDate, txtHour, txtDur, false);
                 refreshFlightData(model);
-                JOptionPane.showMessageDialog(this, "Success!");
+                JOptionPane.showMessageDialog(this, "Flight added successfully!");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         });
 
-        JButton btnDel = new JButton("Delete Selected");
+        // --- EDIT ACTION ---
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a flight to update!");
+                return;
+            }
+            try {
+                validateAndSave(txtNum, txtDep, txtArr, txtDate, txtHour, txtDur, true);
+                refreshFlightData(model);
+                JOptionPane.showMessageDialog(this, "Flight updated successfully!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Update Error: " + ex.getMessage());
+            }
+        });
+
         btnDel.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row != -1) {
-                flightManager.deleteFlightWithIntegrity((int)model.getValueAt(row, 0));
+                int fNum = (int)model.getValueAt(row, 0);
+
+                // Önce bağlı rezervasyonları temizle (Veritabanından siler)
+                reservationManager.cancelAllReservationsByFlight(String.valueOf(fNum));
+
+                // Sonra uçuşu sil
+                flightManager.deleteFlightWithIntegrity(fNum);
+
                 refreshFlightData(model);
+                JOptionPane.showMessageDialog(this, "Flight and all related bookings deleted.");
+            }
+        });
+
+        // Tablodan seçim yapınca kutuları doldur (Edit kolaylığı için)
+        table.getSelectionModel().addListSelectionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row != -1) {
+                txtNum.setText(model.getValueAt(row, 0).toString());
+                txtDep.setText(model.getValueAt(row, 1).toString());
+                txtArr.setText(model.getValueAt(row, 2).toString());
+                txtDate.setText(model.getValueAt(row, 3).toString());
+                txtHour.setText(model.getValueAt(row, 4).toString());
+                txtDur.setText(model.getValueAt(row, 5).toString());
             }
         });
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(btnDel); buttonPanel.add(btnAdd);
+        buttonPanel.add(btnDel); buttonPanel.add(btnEdit); buttonPanel.add(btnAdd);
 
         mainPanel.add(new JScrollPane(table), BorderLayout.CENTER);
         mainPanel.add(formPanel, BorderLayout.NORTH);
@@ -132,16 +159,49 @@ public class AdminGUI extends JFrame {
         return mainPanel;
     }
 
+    // --- ÖNEMLİ: VALIDATION VE SÜRE NORMALİZASYONU ---
+    private void validateAndSave(JTextField fNo, JTextField dep, JTextField arr, JTextField dt, JTextField hr, JTextField dur, boolean isEdit) throws Exception {
+        if (fNo.getText().isEmpty() || dt.getText().isEmpty()) throw new Exception("Fill all fields!");
+
+        // Tarih Kontrolü
+        if (!dt.getText().matches("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")) {
+            throw new Exception("Invalid Date (YYYY-MM-DD)!");
+        }
+
+        // Saat Kontrolü
+        float h = Float.parseFloat(hr.getText());
+        if (h < 0 || h >= 24 || (h % 1) > 0.59) throw new Exception("Invalid Hour (0.00-23.59)!");
+
+        // Süre Normalizasyonu (1.99 -> 2.39 Çözümü)
+        float rawDur = Float.parseFloat(dur.getText());
+        int hPart = (int) rawDur;
+        int mPart = Math.round((rawDur - hPart) * 100);
+        if (mPart >= 60) {
+            hPart += mPart / 60;
+            mPart = mPart % 60;
+        }
+        float normalizedDur = hPart + (mPart / 100.0f);
+
+        if (isEdit) {
+            // Eğer edit modundaysak önce eskiyi silip yeniyi ekliyoruz (Manager yapısına uygun)
+            flightManager.deleteFlightWithIntegrity(Integer.parseInt(fNo.getText()));
+        }
+
+        flightManager.createAndSaveFlight(
+                Integer.parseInt(fNo.getText()), dep.getText(), arr.getText(),
+                dt.getText(), h, normalizedDur
+        );
+    }
+
+    // --- DİĞER PANELLER (Concurrency, Report, Staff) AYNI KALIYOR ---
     private JPanel createSimulationPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         JPanel topControls = new JPanel();
         JCheckBox syncCheck = new JCheckBox("Synchronized Mode");
         JButton runBtn = new JButton("Run 90 Passenger Simulation");
-
         Seat[][] simMatrix = seatManager.createSeatingArrangement("SIM-FLIGHT", 180);
         SeatMapPanel seatMap = new SeatMapPanel(simMatrix);
         JLabel occupiedLabel = new JLabel("Occupied Seats: 0 / 180");
-
         runBtn.addActionListener(e -> {
             resetMatrix(simMatrix);
             for (int i = 0; i < 90; i++) {
@@ -154,7 +214,6 @@ public class AdminGUI extends JFrame {
                 }).start();
             }
         });
-
         topControls.add(syncCheck); topControls.add(runBtn);
         mainPanel.add(topControls, BorderLayout.NORTH);
         mainPanel.add(new JScrollPane(seatMap), BorderLayout.CENTER);
@@ -166,7 +225,6 @@ public class AdminGUI extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
         JTextArea reportArea = new JTextArea("Click to generate report...");
         JButton generateBtn = new JButton("Generate Report (Threaded)");
-
         generateBtn.addActionListener(e -> {
             generateBtn.setEnabled(false);
             new Thread(() -> {
@@ -177,14 +235,10 @@ public class AdminGUI extends JFrame {
                         int reserved = seatManager.reservedSeatsCount(seatManager.getSeatsForFlight(f.getFlightNum()));
                         sb.append(String.format("Flight %d: Rate: %.2f%%\n", f.getFlightNum(), (reserved/180.0)*100));
                     });
-                    SwingUtilities.invokeLater(() -> {
-                        reportArea.setText(sb.toString());
-                        generateBtn.setEnabled(true);
-                    });
+                    SwingUtilities.invokeLater(() -> { reportArea.setText(sb.toString()); generateBtn.setEnabled(true); });
                 } catch (Exception ex) {}
             }).start();
         });
-
         mainPanel.add(new JScrollPane(reportArea), BorderLayout.CENTER);
         mainPanel.add(generateBtn, BorderLayout.SOUTH);
         return mainPanel;
@@ -195,7 +249,6 @@ public class AdminGUI extends JFrame {
         DefaultTableModel staffModel = new DefaultTableModel(new String[]{"Staff Username", "Role"}, 0);
         JTable staffTable = new JTable(staffModel);
         refreshStaffTable(staffModel);
-
         JButton btnAdd = new JButton("Add New Staff");
         btnAdd.addActionListener(e -> {
             String user = JOptionPane.showInputDialog(this, "Staff Username:");
@@ -204,7 +257,6 @@ public class AdminGUI extends JFrame {
                 refreshStaffTable(staffModel);
             }
         });
-
         mainPanel.add(new JScrollPane(staffTable), BorderLayout.CENTER);
         mainPanel.add(btnAdd, BorderLayout.SOUTH);
         return mainPanel;

@@ -271,6 +271,7 @@ public class PassengerGUI extends JFrame {
         return mainPanel;
     }
 
+    // PassengerGUI.java içindeki metot
     private void refreshMyReservations(DefaultTableModel model) {
         model.setRowCount(0);
         User current = AuthService.getCurrentUser();
@@ -278,8 +279,12 @@ public class PassengerGUI extends JFrame {
 
         String currentUserId = current.getUsername();
         List<Reservation> myRes = new ReservationDAOImpl().getReservationsByPassenger(currentUserId);
+
         for (Reservation r : myRes) {
-            model.addRow(new Object[]{r.getReservationCode(), r.getFlightNum(), r.getSeatNum(), r.getDateOfReservation()});
+            // KRİTİK KONTROL: Eğer uçuş Manager'da yoksa (silindiyse) tabloya ekleme
+            if (flightManager.findFlight(Integer.parseInt(r.getFlightNum())) != null) {
+                model.addRow(new Object[]{r.getReservationCode(), r.getFlightNum(), r.getSeatNum(), r.getDateOfReservation()});
+            }
         }
     }
 

@@ -15,13 +15,17 @@ public class ReservationDAOImpl extends AbstractCSVDAO<Reservation, String> {
         return new Reservation();
     }
 
-
     public List<Reservation> getReservationsByPassenger(String passengerID) {
         return getAll().stream()
                 .filter(r -> r.getPassengerID().equals(passengerID))
                 .collect(Collectors.toList());
     }
 
+    public void deleteByFlightNum(String flightNum) {
+        List<Reservation> all = getAll(); // Mevcut tüm rezervasyonları oku
+        all.removeIf(r -> r.getFlightNum().equals(flightNum)); // Uçuşa ait olanları listeden at
+        saveAll(all); // Kalanları dosyaya geri yaz (Dosyayı overwrite eder)
+    }
 
     public List<Reservation> getReservationsByFlight(String flightNum) {
         return getAll().stream()

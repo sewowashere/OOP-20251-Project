@@ -3,6 +3,7 @@ package com.airline.services;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import java.util.List;
 import com.airline.models.Baggage;
 import com.airline.models.Reservation;
 import com.airline.models.Seat;
@@ -28,8 +29,8 @@ public class ReservationManager implements IReservationService {
     }
 
     /**
-     * SENARYO 1: Proje gereksinimlerine göre thread yönetimi
-     * 90 yolcu thread'i bu metodu çağırır.
+     * SENARYO 1: Thread Yönetimi ve Concurrency
+     * AdminGUI'deki simülasyon bu metodu çağırır.
      */
     @Override
     public void reserveRandomSeat(Seat[][] matrix, boolean isSynchronized) {
@@ -40,31 +41,25 @@ public class ReservationManager implements IReservationService {
         }
     }
 
-    //THREAD-SAFE (Synchronized): 90 koltuk dolar, 90 koltuk boş kalır.
+    // THREAD-SAFE (Synchronized): Yarış durumunu (Race Condition) önler.
     private synchronized void reserveWithSync(Seat[][] matrix) {
         performRandomSelection(matrix);
     }
 
-    //THREAD-SAFE OLMAYAN: Race condition nedeniyle hatalı yerleşim oluşur.
+    // THREAD-SAFE OLMAYAN: Race condition oluşmasına izin verir.
     private void reserveWithoutSync(Seat[][] matrix) {
         performRandomSelection(matrix);
     }
 
-
-    //Ortak Seçim Mantığı: Yolcu rastgele boş bir koltuk bulana kadar dener.
     private void performRandomSelection(Seat[][] matrix) {
         boolean seated = false;
         while (!seated) {
-            // Rastgele koltuk seçimi
             int r = random.nextInt(matrix.length);
             int c = random.nextInt(matrix[0].length);
             Seat seat = matrix[r][c];
 
             if (!seat.isReserved()) {
-                // Senkronize olmayan modda race condition'ı tetiklemek için gecikme
-                simulateDelay();
-
-                // İki thread aynı anda buraya girerse ikisi de aynı koltuğu rezerve eder
+                simulateDelay(); // Race condition'ı gözle görülür kılmak için
                 seat.setReserved(true);
                 seated = true;
             }
@@ -75,24 +70,30 @@ public class ReservationManager implements IReservationService {
         try { Thread.sleep(10); } catch (InterruptedException e) { e.printStackTrace(); }
     }
 
+    /**
+     * Admin bir uçuşu sildiğinde çağrılır.
+     * Veritabanındaki tüm ilişkili rezervasyonları temizler.
+     */
+    public void cancelAllReservationsByFlight(String flightNum) {
+        // DAO üzerinden hem bellekten hem dosyadan (CSV) siler
+        reservationDao.deleteByFlightNum(flightNum);
+    }
 
     public Reservation createReservation(String flightNum, String passengerID, String seatNum, double weight) {
         String planeID = "PLANE-" + flightNum;
         Seat seat = seatDao.findById(planeID + "-" + seatNum);
 
         if (seat == null || seat.isReserved()) {
-            throw new IllegalStateException("Koltuk uygun değil!");
+            throw new IllegalStateException("Seat is not available!");
         }
 
-        // --- DİNAMİK FİYATLANDIRMA ENTEGRASYONU ---
+        // --- DİNAMİK FİYATLANDIRMA ---
         com.airline.services.pricing.CalculatePrice priceCalculator = new com.airline.services.pricing.CalculatePrice();
         double finalPrice = priceCalculator.getFinalPrice(seat.getPrice(), seat.getSeatClass());
-        // ------------------------------------------
 
         String reservationCode = generateReservationCode();
         String dateOfReservation = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
-        // Ticket nesnesine hesaplanan dinamik fiyatı veriyoruz
         Ticket ticket = new Ticket("T-" + reservationCode, finalPrice, new Baggage(weight));
 
         Reservation reservation = new Reservation();
@@ -104,8 +105,8 @@ public class ReservationManager implements IReservationService {
         reservation.setTicket(ticket);
 
         seat.setReserved(true);
-        seatDao.update(seat);
-        reservationDao.save(reservation);
+        seatDao.update(seat); // Koltuğu rezerve et
+        reservationDao.save(reservation); // Rezervasyonu kaydet
 
         return reservation;
     }
@@ -114,6 +115,7 @@ public class ReservationManager implements IReservationService {
         Reservation reservation = reservationDao.findById(reservationCode);
         if (reservation == null) return false;
 
+        // Koltuğu tekrar boşa çıkar
         String planeID = "PLANE-" + reservation.getFlightNum();
         Seat seat = seatDao.findById(planeID + "-" + reservation.getSeatNum());
 
