@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item key="hasShownOverlayPopupBefore" value="true"/>
+	<section name="java.lang.Class">
+		<item key="replaceBarOpen" value="false"/>
+		<list key="findhistory">
+			<item value="handleLogin"/>
+			<item value="formPanel.add(loginButton, gbc);"/>
+			<item value="1234"/>
+			<item value="&quot;123,"/>
+		</list>
+	</section>
+</section>

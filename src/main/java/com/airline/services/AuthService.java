@@ -11,10 +11,20 @@ public class AuthService {
         // Boş constructor
     }
 
-    // AdminGUI'nin beklediği o meşhur metod
+ // AuthService.java içine eklenecek metot
     public static void register(String username, String password, String role) {
+        com.airline.persistence.UserDAOImpl userDao = new com.airline.persistence.UserDAOImpl();
+        
+        // Kullanıcı adı zaten var mı kontrolü (isteğe bağlı ama önerilir)
+        boolean exists = userDao.getAll().stream()
+                .anyMatch(u -> u.getUsername().equalsIgnoreCase(username));
+                
+        if (exists) {
+            throw new RuntimeException("Username already taken!");
+        }
+
         User newUser = new User(username, password, role);
-        userDao.save(newUser);
+        userDao.save(newUser); // Bu işlem veriyi users.csv dosyasına ekler
     }
 
     public static String getUsername() {
